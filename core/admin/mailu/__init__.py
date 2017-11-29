@@ -16,33 +16,41 @@ import uuid
 app = flask.Flask(__name__)
 
 default_config = {
+    # Specific to the admin UI
     'SQLALCHEMY_DATABASE_URI': 'sqlite:////data/main.db',
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
-    'INSTANCE_ID_PATH': '/data/instance',
-    'STATS_ENDPOINT': '0.{}.stats.mailu.io',
-    'SECRET_KEY': 'changeMe',
     'DOCKER_SOCKET': 'unix:///var/run/docker.sock',
-    'HOSTNAMES': 'mail.mailu.io',
-    'DOMAIN': 'mailu.io',
-    'POSTMASTER': 'postmaster',
-    'SITENAME': 'Mailu',
-    'WEBSITE': 'https://mailu.io',
-    'DEBUG': False,
-    'BOOTSTRAP_SERVE_LOCAL': True,
-    'DKIM_PATH': '/dkim/{domain}.{selector}.key',
-    'DKIM_SELECTOR': 'dkim',
-    'DMARC_RUA': None,
-    'DMARC_RUF': None,
     'BABEL_DEFAULT_LOCALE': 'en',
     'BABEL_DEFAULT_TIMEZONE': 'UTC',
-    'FRONTEND': 'none',
-    'TLS_FLAVOR': 'cert',
-    'CERTS_PATH': '/certs',
-    'PASSWORD_SCHEME': 'SHA512-CRYPT',
-    'WEBMAIL': 'none',
-    'AUTH_RATELIMIT': '10/minute;1000/hour',
+    'BOOTSTRAP_SERVE_LOCAL': True,
     'RATELIMIT_STORAGE_URL': 'redis://redis',
-    'DISABLE_STATISTICS': 'False'
+    'DEBUG': False,
+    # Statistics management
+    'INSTANCE_ID_PATH': '/data/instance',
+    'STATS_ENDPOINT': '0.{}.stats.mailu.io',
+    # Common configuration variables
+    'SECRET_KEY': 'changeMe',
+    'DOMAIN': 'mailu.io',
+    'HOSTNAMES': 'mail.mailu.io,alternative.mailu.io,yetanother.mailu.io',
+    'POSTMASTER': 'postmaster',
+    'TLS_FLAVOR': 'cert',
+    'AUTH_RATELIMIT': '10/minute;1000/hour',
+    'DISABLE_STATISTICS': 'False',
+    # Mail settings
+    'DMARC_RUA': None,
+    'DMARC_RUF': None,
+    'WELCOME': 'False',
+    'WELCOME_SUBJECT': 'Dummy welcome topic',
+    'WELCOME_BODY': 'Dummy welcome body',
+    'DKIM_SELECTOR': 'dkim',
+    'DKIM_PATH': '/dkim/{domain}.{selector}.key',
+    # Web settings
+    'SITENAME': 'Mailu',
+    'WEBSITE': 'https://mailu.io',
+    'WEB_ADMIN': '/admin',
+    'WEB_WEBMAIL': '/webmail',
+    # Advanced settings
+    'PASSWORD_SCHEME': 'SHA512-CRYPT',
 }
 
 # Load configuration from the environment if available
@@ -75,12 +83,12 @@ def get_locale():
 # Login configuration
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = ".login"
+login_manager.login_view = "ui.login"
 
 @login_manager.unauthorized_handler
 def handle_needs_login():
     return flask.redirect(
-        flask.url_for('.login', next=flask.request.endpoint)
+        flask.url_for('ui.login', next=flask.request.endpoint)
     )
 
 @app.context_processor

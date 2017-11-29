@@ -11,7 +11,7 @@ STATUSES = {
     "authentication": ("Authentication credentials invalid", {
         "imap": "AUTHENTICATIONFAILED",
         "smtp": "535 5.7.8",
-        "pop3": ""
+        "pop3": "-ERR Authentication failed"
     }),
 }
 
@@ -37,21 +37,25 @@ def handle_authentication(headers):
         password = urllib.parse.unquote(headers["Auth-Pass"])
         ip = urllib.parse.unquote(headers["Client-Ip"])
         user = models.User.query.get(user_email)
+        status = False
         if user:
             for token in user.tokens:
                 if (token.check_password(password) and
                     (not token.ip or token.ip == ip)):
-                        return {
-                            "Auth-Status": "OK",
-                            "Auth-Server": server,
-                            "Auth-Port": port
-                        }
+                        status = True
             if user.check_password(password):
-                return {
-                    "Auth-Status": "OK",
-                    "Auth-Server": server,
-                    "Auth-Port": port
-                }
+                status = True
+            if status:
+                if protocol == "imap" and not user.enable_imap:
+                    status = False
+                elif protocol == "pop3" and not user.enable_pop:
+                    status = False
+        if status:
+            return {
+                "Auth-Status": "OK",
+                "Auth-Server": server,
+                "Auth-Port": port
+            }
         else:
             status, code = get_status(protocol, "authentication")
             return {
@@ -60,8 +64,7 @@ def handle_authentication(headers):
                 "Auth-Wait": 0
             }
     # Unexpected
-    else:
-        return {}
+    return {}
 
 
 def get_status(protocol, status):

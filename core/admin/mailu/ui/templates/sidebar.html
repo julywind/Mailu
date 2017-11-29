@@ -36,7 +36,7 @@
         <i class="fa fa-ticket"></i> <span>{% trans %}Authentication tokens{% endtrans %}</span>
       </a>
     </li>
-    
+
     <li class="header">{% trans %}Administration{% endtrans %}</li>
     {% if current_user.global_admin %}
     <li>
@@ -59,6 +59,11 @@
         <i class="fa fa-reply-all"></i> <span>{% trans %}Relayed domains{% endtrans %}</span>
       </a>
     </li>
+    <li>
+      <a href="{{ config["WEB_ADMIN"] }}/antispam/">
+        <i class="fa fa-trash-o"></i> <span>{% trans %}Antispam{% endtrans %}</span>
+      </a>
+    </li>
     {% endif %}
     {% if current_user.manager_of or current_user.global_admin %}
     <li>
@@ -72,18 +77,18 @@
     <li class="header">{% trans %}Go to{% endtrans %}</li>
     {% if config["WEBMAIL"] != "none" %}
     <li>
-      <a href="/webmail/">
+      <a href="{{ config["WEB_WEBMAIL"] }}/">
         <i class="fa fa-envelope-o"></i> <span>{% trans %}Webmail{% endtrans %}</span>
       </a>
     </li>
     {% endif %}
     <li>
-      <a href="https://mailu.io">
+      <a href="{{ config["WEBSITE"] }}">
         <i class="fa fa-globe"></i> <span>{% trans %}Website{% endtrans %}</span>
       </a>
     </li>
     <li>
-      <a href="https://github.com/Mailu/Mailu">
+      <a href="https://mailu.io">
         <i class="fa fa-life-ring"></i> <span>{% trans %}Help{% endtrans %}</span>
       </a>
     </li>
